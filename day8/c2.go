@@ -44,39 +44,62 @@ func findint(slice []int, val int) (int, bool) {
 func main() {
 
 	list, _ := readLines("input8.txt")
-	var visited []int
-	var current int = 0
-	var accum int = 0
-	var instruction string = ""
-	var number int
+	var list2 []string
 
-	for true {
-		// if we've visited somewhere that's already been visted
-		if _, found := findint(visited, current); found {
-			break
-		}
+	for index := range list {
 
-		visited = append(visited, current)
-		if current > len(list)-1 || current < 0 {
-			fmt.Println("Theres been an error")
-			break
-		}
+		list2 = make([]string, len(list))
+		copy(list2, list)
 
-		line := list[current]
-		lineRegex := regexp.MustCompile("(.*) (.*)")
-		lineParse := lineRegex.FindAllStringSubmatch(line, -1)
-
-		instruction = lineParse[0][1]
-		number, _ = strconv.Atoi(lineParse[0][2])
-		switch instruction {
+		switch list2[index][:3] {
 		case "nop":
-			current++
-		case "acc":
-			accum = accum + number
-			current++
+			list2[index] = "jmp" + list2[index][3:]
 		case "jmp":
-			current = current + number
+			list2[index] = "nop" + list2[index][3:]
+		case "acc":
+			continue
+		}
+		// fmt.Println(list[index], ":", list2[index])
+
+		var visited []int
+		var current int = 0
+		var accum int = 0
+		var instruction string = ""
+		var number int
+
+		for true {
+			// if we've visited somewhere that's already been visted
+			if _, found := findint(visited, current); found {
+				break
+			}
+
+			visited = append(visited, current)
+			if current > len(list2)-1 || current < 0 {
+				fmt.Println("Theres been an error")
+				break
+			}
+
+			line := list2[current]
+			lineRegex := regexp.MustCompile("(.*) (.*)")
+			lineParse := lineRegex.FindAllStringSubmatch(line, -1)
+
+			instruction = lineParse[0][1]
+			number, _ = strconv.Atoi(lineParse[0][2])
+			switch instruction {
+			case "nop":
+				current++
+			case "acc":
+				accum = accum + number
+				current++
+			case "jmp":
+				current = current + number
+			}
+
+			if current == len(list2) {
+				fmt.Println(accum)
+				break
+			}
 		}
 	}
-	fmt.Println(accum)
+
 }
